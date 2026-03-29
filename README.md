@@ -39,18 +39,8 @@ A TUI dashboard for monitoring [Claude Code](https://docs.anthropic.com/en/docs/
 
 ## Installation
 
-### Go install
-
 ```sh
 go install github.com/sorafujitani/wez-cc-viewer@latest
-```
-
-### Build from source
-
-```sh
-git clone https://github.com/sorafujitani/wez-cc-viewer.git
-cd wez-cc-viewer
-go build -o wez-cc-viewer
 ```
 
 ## Setup
@@ -61,16 +51,37 @@ Add the following to your `wezterm.lua`:
 local wezterm = require("wezterm")
 local act = wezterm.action
 
--- 1. Handle workspace switch from wez-cc-viewer
+-- Handle workspace switch from wez-cc-viewer
 wezterm.on("user-var-changed", function(window, pane, name, value)
   if name == "switch_workspace" then
     window:perform_action(act.SwitchToWorkspace({ name = value }), pane)
   end
 end)
 
--- 2. Resolve binary path (cached after first call)
---    Needed because WezTerm panes may not inherit your shell's full PATH
---    (e.g. when using mise, asdf, or Go installed via Homebrew).
+-- Keybinding to launch the dashboard
+config.keys = {
+  {
+    key = "a",
+    mods = "LEADER",
+    action = wezterm.action_callback(function(window, pane)
+      local new_pane = pane:split({
+        direction = "Bottom",
+        args = { "wez-cc-viewer" },
+      })
+      window:perform_action(act.TogglePaneZoomState, new_pane)
+    end),
+  },
+}
+```
+
+### PATH not found?
+
+If you manage Go with [mise](https://mise.jdx.dev/), [asdf](https://asdf-vm.com/), or similar tools, WezTerm may not see your full PATH. Use this helper to resolve the binary path dynamically:
+
+<details>
+<summary>Dynamic path resolution</summary>
+
+```lua
 local _bin_cache = nil
 local function find_wez_cc_viewer()
   if _bin_cache then return _bin_cache end
@@ -86,29 +97,23 @@ local function find_wez_cc_viewer()
   end
   return nil
 end
-
--- 3. Add a keybinding to launch the dashboard
-config.keys = {
-  {
-    key = "a",
-    mods = "LEADER",
-    action = wezterm.action_callback(function(window, pane)
-      local bin = find_wez_cc_viewer()
-      if not bin then
-        window:toast_notification("wezterm", "wez-cc-viewer not found in PATH", nil, 3000)
-        return
-      end
-      local new_pane = pane:split({
-        direction = "Bottom",
-        args = { bin },
-      })
-      window:perform_action(act.TogglePaneZoomState, new_pane)
-    end),
-  },
-}
 ```
 
-> **Note**: If `wez-cc-viewer` is in a standard location (e.g. `/usr/local/bin`), you can skip `find_wez_cc_viewer` and use `args = { "wez-cc-viewer" }` directly.
+Then replace `args = { "wez-cc-viewer" }` with:
+
+```lua
+local bin = find_wez_cc_viewer()
+if not bin then
+  window:toast_notification("wezterm", "wez-cc-viewer not found", nil, 3000)
+  return
+end
+local new_pane = pane:split({
+  direction = "Bottom",
+  args = { bin },
+})
+```
+
+</details>
 
 ## Keybindings
 
