@@ -365,7 +365,7 @@ func (m model) viewHeader(w int) string {
 			running++
 		}
 	}
-	title := sTitle.Render("🤖 Agent Dashboard")
+	title := sTitle.Render("🤖 wez-cc-viewer")
 	stats := fmt.Sprintf("%d agents", len(m.agents))
 	if running > 0 {
 		stats += fmt.Sprintf(" · %d active", running)
