@@ -20,9 +20,8 @@ import (
 // ── Colors ──────────────────────────────────────────────
 
 var (
-	cPurple  = lipgloss.Color("141")
-	cGreen   = lipgloss.Color("114")
 	cCyan    = lipgloss.Color("75")
+	cBlue    = lipgloss.Color("69")
 	cGray    = lipgloss.Color("246")
 	cDimGray = lipgloss.Color("240")
 	cWhite   = lipgloss.Color("255")
@@ -36,9 +35,9 @@ var (
 			Border(lipgloss.RoundedBorder()).
 			BorderForeground(cDimGray).
 			Padding(0, 1)
-	sTitle  = lipgloss.NewStyle().Bold(true).Foreground(cPurple)
+	sTitle  = lipgloss.NewStyle().Bold(true).Foreground(cCyan)
 	sStats  = lipgloss.NewStyle().Foreground(cGray).Faint(true)
-	sActive = lipgloss.NewStyle().Foreground(cCyan)
+	sActive = lipgloss.NewStyle().Foreground(cBlue)
 	sIdle   = lipgloss.NewStyle().Foreground(cDimGray)
 	sName   = lipgloss.NewStyle().Foreground(cGray)
 	sSelRow = lipgloss.NewStyle().Background(cSelBg).Foreground(cWhite).Bold(true)
