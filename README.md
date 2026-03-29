@@ -68,21 +68,47 @@ wezterm.on("user-var-changed", function(window, pane, name, value)
   end
 end)
 
--- 2. Add a keybinding to launch the dashboard
+-- 2. Resolve binary path (cached after first call)
+--    Needed because WezTerm panes may not inherit your shell's full PATH
+--    (e.g. when using mise, asdf, or Go installed via Homebrew).
+local _bin_cache = nil
+local function find_wez_cc_viewer()
+  if _bin_cache then return _bin_cache end
+  local ok, stdout = wezterm.run_child_process({
+    os.getenv("SHELL") or "/bin/zsh", "-lic", "which wez-cc-viewer",
+  })
+  if ok and stdout then
+    local path = stdout:gsub("%s+$", "")
+    if path ~= "" then
+      _bin_cache = path
+      return path
+    end
+  end
+  return nil
+end
+
+-- 3. Add a keybinding to launch the dashboard
 config.keys = {
   {
     key = "a",
     mods = "LEADER",
     action = wezterm.action_callback(function(window, pane)
+      local bin = find_wez_cc_viewer()
+      if not bin then
+        window:toast_notification("wezterm", "wez-cc-viewer not found in PATH", nil, 3000)
+        return
+      end
       local new_pane = pane:split({
         direction = "Bottom",
-        args = { "wez-cc-viewer" },  -- or full path to binary
+        args = { bin },
       })
       window:perform_action(act.TogglePaneZoomState, new_pane)
     end),
   },
 }
 ```
+
+> **Note**: If `wez-cc-viewer` is in a standard location (e.g. `/usr/local/bin`), you can skip `find_wez_cc_viewer` and use `args = { "wez-cc-viewer" }` directly.
 
 ## Keybindings
 
