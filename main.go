@@ -381,16 +381,9 @@ func (m model) viewRow(i int, a Agent, w int) string {
 	if len(proj) > 22 {
 		proj = proj[:22]
 	}
+	isSel := i == m.sel
 
-	if i == m.sel {
-		dot, st := "●", "active"
-		if a.Status != "running" {
-			dot, st = "○", "idle  "
-		}
-		content := fmt.Sprintf(" ▸ %s %-22s  %-6s  %s", dot, proj, st, a.Workspace)
-		return sSelRow.Width(w + 2).Render(content)
-	}
-
+	// Status colors are always preserved regardless of selection
 	var dot, st string
 	if a.Status == "running" {
 		dot = sActive.Render("●")
@@ -399,8 +392,25 @@ func (m model) viewRow(i int, a Agent, w int) string {
 		dot = sIdle.Render("○")
 		st = sIdle.Render("idle  ")
 	}
-	return fmt.Sprintf("     %s %s  %s  %s",
-		dot, sName.Render(fmt.Sprintf("%-22s", proj)), st, sIdle.Render(a.Workspace))
+
+	var cursor, name, ws string
+	if isSel {
+		cursor = " ▸"
+		name = lipgloss.NewStyle().Bold(true).Foreground(cWhite).Render(fmt.Sprintf("%-22s", proj))
+		ws = lipgloss.NewStyle().Foreground(cGray).Render(a.Workspace)
+	} else {
+		cursor = "  "
+		name = sName.Render(fmt.Sprintf("%-22s", proj))
+		ws = sIdle.Render(a.Workspace)
+	}
+
+	content := fmt.Sprintf("  %s %s %s  %s  %s", cursor, dot, name, st, ws)
+	if isSel {
+		// Pad and apply background
+		padded := content + strings.Repeat(" ", max(0, w+2-lipgloss.Width(content)))
+		return lipgloss.NewStyle().Background(cSelBg).Render(padded)
+	}
+	return content
 }
 
 func (m model) viewDetail(w int) string {
