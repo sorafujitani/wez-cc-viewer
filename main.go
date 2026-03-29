@@ -38,7 +38,7 @@ var (
 			Padding(0, 1)
 	sTitle  = lipgloss.NewStyle().Bold(true).Foreground(cPurple)
 	sStats  = lipgloss.NewStyle().Foreground(cGray).Faint(true)
-	sActive = lipgloss.NewStyle().Foreground(cGreen)
+	sActive = lipgloss.NewStyle().Foreground(cCyan)
 	sIdle   = lipgloss.NewStyle().Foreground(cDimGray)
 	sName   = lipgloss.NewStyle().Foreground(cGray)
 	sSelRow = lipgloss.NewStyle().Background(cSelBg).Foreground(cWhite).Bold(true)
